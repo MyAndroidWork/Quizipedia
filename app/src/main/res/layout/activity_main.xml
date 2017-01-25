@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/activity_main_relative"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.puja.trials.fillItUp.MainActivity">
+
+    <ScrollView
+        android:id="@+id/activity_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="3dp"
+        android:layout_alignParentTop="true">
+
+        <LinearLayout
+            android:id="@+id/main_LinearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="5dp">
+
+            <TextView
+                android:id="@+id/main_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="22sp"
+                android:textColor="#000000"
+                android:lineSpacingMultiplier="1.25"/>
+
+        </LinearLayout>
+    </ScrollView>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:alpha=".90"
+        android:layout_margin="@dimen/fab_margin"
+        app:fabSize="normal"
+        android:visibility="gone"
+        android:src="@drawable/ic_action_verified_user"
+        android:layout_alignParentRight="true" />
+
+
+    <GridView
+        android:background="@color/colorAccent"
+        android:padding="1dp"
+        android:layout_marginLeft="1.5dp"
+        android:layout_marginRight="1.5dp"
+        android:layout_marginBottom="1.5dp"
+        android:id="@+id/options_gridview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:numColumns="auto_fit"
+        android:verticalSpacing="2dp"
+        android:horizontalSpacing="1dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignBottom="@id/activity_main"
+        android:visibility="gone"/>
+        <!-- android:background="#424242"
+        android:columnWidth="100dp"
+        android:stretchMode="spacingWidthUniform" -->
+
+
+</RelativeLayout>
