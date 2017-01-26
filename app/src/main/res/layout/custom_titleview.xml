@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/title_linear"
+    android:orientation="horizontal"
+    android:padding="2dp"
+    android:layout_alignParentTop="true"
+    android:layout_alignParentStart="true"
+    android:gravity="center"
+    android:weightSum="1"
+    android:layout_alignParentLeft="true"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/iv_refresh"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="0.20"
+        android:src="@drawable/ic_action_autorenew"
+        android:layout_gravity="start|left" />
+
+    <TextView
+        android:id="@+id/mainTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:padding="2dp"
+        android:text="QUIZIPEDIA"
+        android:gravity="center"
+        android:textStyle="bold"
+        android:textColor="#ffffffff"
+        android:layout_weight="0.75"
+        android:textSize="26sp"/>
+
+    <ImageView
+        android:id="@+id/iv_submit"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="0.10"
+        android:src="@drawable/ic_action_verified_user"
+        android:layout_gravity="end|right" />
+
+
+
+</LinearLayout>

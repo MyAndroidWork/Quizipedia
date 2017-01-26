@@ -1,45 +1,35 @@
 package com.puja.trials.fillItUp;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.GridView;
-import android.widget.ListAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.puja.trials.fillItUp.utils.NetworkConnectivity;
 import com.puja.trials.fillItUp.utils.PatternEditableBuilder;
 import com.puja.trials.fillItUp.utils.Utilities;
 
-import org.jsoup.safety.Whitelist;
-
-import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class MainActivity extends Activity implements GetWikipediaContentAsync.AsyncResponse {
+public class MainActivity extends AppCompatActivity implements GetWikipediaContentAsync.AsyncResponse {
 
     TextView mainText;
     GridView optionsGrid;
-    FloatingActionButton fab;
+    ImageView iv_submit, iv_refresh;
     Map<Integer, Word> blankWordMap;
     GetWikipediaContentAsync getContent;
 
@@ -52,8 +42,14 @@ public class MainActivity extends Activity implements GetWikipediaContentAsync.A
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        android.support.v7.app.ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayOptions(actionBar.getDisplayOptions() | android.support.v7.app.ActionBar.DISPLAY_SHOW_CUSTOM);
+        actionBar.setTitle(R.string.app_name);
+        actionBar.setCustomView(R.layout.custom_titleview);
+
         utilities = new Utilities(this);
         progressDialog = new ProgressDialog(this);
+
 
     /*    while (!NetworkConnectivity.isNetworkAvailable(getApplicationContext())){
             progressDialog.setMessage("Please check your Internet Connection..\n Unable to resume..");
@@ -65,24 +61,30 @@ public class MainActivity extends Activity implements GetWikipediaContentAsync.A
 
             mainText = (TextView) findViewById(R.id.main_textview);
             optionsGrid = (GridView) findViewById(R.id.options_gridview);
+            iv_submit = (ImageView) findViewById(R.id.iv_submit);
+            iv_refresh = (ImageView) findViewById(R.id.iv_refresh);
 
-            blankWordMap = new HashMap<Integer, Word>();
+            onAppRefresh();
 
-            getContent = new GetWikipediaContentAsync(MainActivity.this, this, blankWordMap);
-            getContent.execute();
+            Typeface textFont = Typeface.createFromAsset(getAssets(), "fonts/Bariol_Regular.otf");
+            mainText.setTypeface(textFont);
 
-            Typeface custom_font = Typeface.createFromAsset(getAssets(), "fonts/Bariol_Regular.otf");
-            mainText.setTypeface(custom_font);
-
-            fab = (FloatingActionButton) findViewById(R.id.fab);
-
-            fab.setOnClickListener(new View.OnClickListener() {
+            iv_submit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
                     utilities.longToast("Score-" + score);
                 }
             });
+
+            iv_refresh.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onAppRefresh();
+                }
+            });
+
+
         }
         else {
             utilities.longToast("No Internet Connection Available!");
@@ -112,7 +114,7 @@ public class MainActivity extends Activity implements GetWikipediaContentAsync.A
             utilities.shortToast("Could not find any text!");
         }else {
             mainText.setText(modifiedParagraph);
-            fab.setVisibility(View.VISIBLE);
+            imageView.setVisibility(View.VISIBLE);
 
             if (options != null){
                 Collections.shuffle(options);
@@ -131,7 +133,6 @@ public class MainActivity extends Activity implements GetWikipediaContentAsync.A
                         @Override
                         public void onSpanClicked(String text, int start, int end) {
                             Log.d("Clicked Blank", start + "--" + end);
-                            fab.setVisibility(View.GONE);
                             if (optionsGrid.getVisibility() != View.VISIBLE)
                             {
                                 optionsGrid.setVisibility(View.VISIBLE);
@@ -160,7 +161,6 @@ public class MainActivity extends Activity implements GetWikipediaContentAsync.A
                                     optionsGrid.startAnimation(bottomDown);
                                     //    utilities.shortToast("Clicked : " + blankAnswer[1]);
                                     optionsGrid.setVisibility(View.GONE);
-                                    fab.setVisibility(View.VISIBLE);
 
                                     modifyScore(blankAnswer);
                                 }
@@ -169,6 +169,14 @@ public class MainActivity extends Activity implements GetWikipediaContentAsync.A
 
                     }).into(mainText);
         }
+    }
+
+    private void onAppRefresh()
+    {
+        blankWordMap = new HashMap<Integer, Word>();
+
+        getContent = new GetWikipediaContentAsync(MainActivity.this, this, blankWordMap);
+        getContent.execute();
     }
 
     private void modifyScore(String[] blankAnswer) {
@@ -213,7 +221,6 @@ public class MainActivity extends Activity implements GetWikipediaContentAsync.A
 }
 
 //Todo - Replace blank with word selected
-//Todo - Add actions to FAB
 //TODO - Enhance the total UI
 
 
