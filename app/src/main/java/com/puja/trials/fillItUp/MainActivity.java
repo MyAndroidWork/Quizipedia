@@ -6,7 +6,6 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -32,6 +31,7 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
     ImageView iv_submit, iv_refresh;
     Map<Integer, Word> blankWordMap;
     GetWikipediaContentAsync getContent;
+    OptionsAdapter adapter;
 
     Utilities utilities;
     ProgressDialog progressDialog;
@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
 
 
     @Override
-    public void processFinish(String modifiedParagraph, ArrayList<String> options) {
+    public void processFinish(final String modifiedParagraph, ArrayList<String> options) {
 
         final ArrayList<String> blankOptions = options;
 
@@ -114,13 +114,16 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
             utilities.shortToast("Could not find any text!");
         }else {
             mainText.setText(modifiedParagraph);
-            imageView.setVisibility(View.VISIBLE);
+         //   iv_submit.setVisibility(View.VISIBLE);
 
             if (options != null){
                 Collections.shuffle(options);
-                OptionsAdapter adapter = new OptionsAdapter(this, options);
-                optionsGrid.setAdapter(adapter);
-
+                if (adapter == null){
+                    adapter = new OptionsAdapter(this, options);
+                    optionsGrid.setAdapter(adapter);
+                }else {
+                    adapter.notifyDataSetChanged();
+                }
             }else {
                 utilities.longToast("No options to show!");
             }
@@ -165,6 +168,8 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
                                     modifyScore(blankAnswer);
                                 }
                             });
+
+                            modifiedParagraph.replace(text, blankAnswer[1]);
                         }
 
                     }).into(mainText);
@@ -182,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
     private void modifyScore(String[] blankAnswer) {
 
         if (blankAnswer[0].equals(blankAnswer[1])){
-            score += 10;
+            score += 1;
         }
     }
 
