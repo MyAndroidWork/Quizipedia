@@ -5,6 +5,8 @@ package com.puja.trials.fillItUp.utils;
  * Original Source Link - https://gist.github.com/nesquena/f2504c642c5de47b371278ee61c75124#file-patterneditablebuilder-java
  */
 
+import android.graphics.Color;
+import android.text.Editable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextPaint;
@@ -56,7 +58,7 @@ public class PatternEditableBuilder {
     /* This stores the click listener for a pattern item
        Used to handle clicks to a particular category of spans */
     public interface SpannableClickedListener {
-        void onSpanClicked(String text, int start, int end);
+        void onSpanClicked(String text, View view, int start, int end);
     }
 
     /* This is the custom clickable span class used
@@ -88,7 +90,7 @@ public class PatternEditableBuilder {
                 int start = span.getSpanStart(this);
                 int end = span.getSpanEnd(this);
                 CharSequence text = span.subSequence(start, end);
-                item.listener.onSpanClicked(text.toString(), start, end);
+                item.listener.onSpanClicked(text.toString(),  widget, start, end);
             }
             widget.invalidate();
         }
@@ -141,6 +143,8 @@ public class PatternEditableBuilder {
 
         SpannableStringBuilder result = build(textView.getText());
         textView.setText(result);
+    //    textView.setTextColor(Color.parseColor("#ff0099cc"));
+        textView.setLinkTextColor(Color.parseColor("#ff0099cc"));
         textView.setMovementMethod(LinkMovementMethod.getInstance());
     }
 

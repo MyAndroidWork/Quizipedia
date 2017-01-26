@@ -5,6 +5,8 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
@@ -130,12 +132,14 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
 
             final String[] blankAnswer = new String[2];
 
-            new PatternEditableBuilder().addPattern(Pattern.compile("_____"), Color.BLACK,
+            new PatternEditableBuilder().addPattern(Pattern.compile("_____"), Color.parseColor("#ff0099cc"),
                     new PatternEditableBuilder.SpannableClickedListener() {
 
                         @Override
-                        public void onSpanClicked(String text, int start, int end) {
+                        public void onSpanClicked(final String text, final View view, final int start, final int end) {
                             Log.d("Clicked Blank", start + "--" + end);
+                            blankAnswer[0] = text;
+
                             if (optionsGrid.getVisibility() != View.VISIBLE)
                             {
                                 optionsGrid.setVisibility(View.VISIBLE);
@@ -166,10 +170,21 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
                                     optionsGrid.setVisibility(View.GONE);
 
                                     modifyScore(blankAnswer);
+
+                                /*    Editable textViews = (Editable) view;
+                                    Log.d("Values - ", start + "----" + end );
+                                    textViews.replace(start, end, blankAnswer[1]);
+                                /*    Spanned span = (Spanned) textViews.getText();
+                                    String text = String.valueOf(span.subSequence(start, end));
+                                    text.replace(text, blankAnswer[1]);
+
+                                /*    if (blankAnswer[2]!= null && blankAnswer[2].length() > 0){
+                                        blankAnswer[0].replace(blankAnswer[0], blankAnswer[1]);
+                                    } */
                                 }
                             });
 
-                            modifiedParagraph.replace(text, blankAnswer[1]);
+
                         }
 
                     }).into(mainText);
@@ -224,8 +239,3 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
         super.onStop();
     }
 }
-
-//Todo - Replace blank with word selected
-//TODO - Enhance the total UI
-
-

@@ -113,13 +113,13 @@ public class GetWikipediaContentAsync extends AsyncTask<Void, Void, String> {
 
     private String findBlankWords(String text)
     {
-        String modifiedText = "";
+        String modifiedText = "", modifiedLine = "";
         BreakIterator iterator = BreakIterator.getSentenceInstance(Locale.US);
         iterator.setText(text);
 
         int start = iterator.first();
-        int noOfLines = 0;
-        int blankNo = 0;
+        int noOfLines = 0, blankNo = 0, noOfWords=0;
+        int endIndexWord, startIndexWord;
 
         for (int end = iterator.next(); end != BreakIterator.DONE && noOfLines < 10; start = end, end = iterator.next()) {
             String line = text.substring(start, end);
@@ -129,9 +129,7 @@ public class GetWikipediaContentAsync extends AsyncTask<Void, Void, String> {
                 Log.d("Line -", start + "-" + line + "-" + end);
                 String currentWord = null;
                 String[] wordsInLine = Pattern.compile("\\s+").split(line);
-                int noOfWords = wordsInLine.length;
-
-                int endIndexWord, startIndexWord;
+                noOfWords = wordsInLine.length;
 
                 do {
                     if (noOfWords > 1)
@@ -150,7 +148,7 @@ public class GetWikipediaContentAsync extends AsyncTask<Void, Void, String> {
                                 blankNo = noOfLines + 1;
                                 String toReplace = "(" + blankNo + ") " + "_____";
                                 //addWordToHashMap(noOfLines, start, end, currentWord);
-                                String modifiedLine = line.replaceFirst(currentWord, toReplace);
+                                modifiedLine = line.replaceFirst(currentWord, toReplace);
                                 modifiedText = modifiedText.concat(modifiedLine);
                                 startIndexWord = modifiedText.indexOf(toReplace) + 4; //+4 to incorporate the parentheses&num
                                 endIndexWord = startIndexWord + toReplace.length() - 1;
