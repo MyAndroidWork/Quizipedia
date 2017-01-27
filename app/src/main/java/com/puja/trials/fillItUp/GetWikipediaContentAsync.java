@@ -32,7 +32,6 @@ public class GetWikipediaContentAsync extends AsyncTask<Void, Void, String> {
     public ProgressDialog mDialog;
     Map<Integer, Word> blankWordMap;
     ArrayList<String> options;
-   // private static final String url = "http://en.wikipedia.org/wiki/Special:Random";
     private static final String url = "https://en.wikipedia.org/w/api.php?format=json&action=query&generator=random&grnnamespace=0&prop=extracts&explaintext=";
 
     public interface AsyncResponse {
@@ -109,7 +108,6 @@ public class GetWikipediaContentAsync extends AsyncTask<Void, Void, String> {
         if (mDialog.isShowing()) {
             mDialog.dismiss();
         }
-
         mDelegate.processFinish(result, options);
     }
 
@@ -153,7 +151,8 @@ public class GetWikipediaContentAsync extends AsyncTask<Void, Void, String> {
                                 modifiedLine = line.replaceFirst(currentWord, toReplace);
                                 modifiedText = modifiedText.concat(modifiedLine);
                                 startIndexWord = modifiedText.indexOf(toReplace) + 4; //+4 to incorporate the parentheses&num
-                                endIndexWord = startIndexWord + toReplace.length() - 1;
+                                //endIndexWord = startIndexWord + toReplace.length() - 1;
+                                endIndexWord = startIndexWord + 5;
                                 addWordToHashMap(noOfLines, startIndexWord, endIndexWord, currentWord);
 
                                 noOfLines++;

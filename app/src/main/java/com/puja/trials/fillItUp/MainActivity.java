@@ -6,7 +6,11 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
+import android.text.Spannable;
 import android.text.Spanned;
+import android.text.TextPaint;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
@@ -31,12 +35,13 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
     TextView mainText;
     GridView optionsGrid;
     ImageView iv_submit, iv_refresh;
+    ProgressDialog progressDialog;
+    Animation bottomUp, bottomDown;
     Map<Integer, Word> blankWordMap;
     GetWikipediaContentAsync getContent;
     OptionsAdapter adapter;
     final String[] blankAnswer = new String[3];
     Utilities utilities;
-    ProgressDialog progressDialog;
     int score = 0;
 
     @Override
@@ -62,9 +67,12 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
         if (NetworkConnectivity.isNetworkAvailable(getApplicationContext())){
 
             mainText = (TextView) findViewById(R.id.main_textview);
+            mainText.setMovementMethod(LinkMovementMethod.getInstance());
             optionsGrid = (GridView) findViewById(R.id.options_gridview);
             iv_submit = (ImageView) findViewById(R.id.iv_submit);
             iv_refresh = (ImageView) findViewById(R.id.iv_refresh);
+            bottomUp = AnimationUtils.loadAnimation(MainActivity.this, R.anim.bottom_up);
+            bottomDown = AnimationUtils.loadAnimation(MainActivity.this, R.anim.bottom_down);
 
             onAppRefresh();
 
@@ -83,14 +91,11 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
                 @Override
                 public void onClick(View view) {
                     onAppRefresh();
-                }
-            });
-
+                }});
 
         }
         else {
             utilities.longToast("No Internet Connection Available!");
-            //TODO - open network settings dialog to toggle wifi
         }
     }
 
@@ -103,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
         {
             utilities.shortToast("Could not find any text!");
         }else {
-            mainText.setText(modifiedParagraph);
+        //    mainText.setText(modifiedParagraph);
 
             if (options != null){
                 Collections.shuffle(options);
@@ -113,63 +118,100 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
                 utilities.longToast("No options to show!");
             }
 
-            new PatternEditableBuilder().addPattern(Pattern.compile("_____"), Color.parseColor("#ff0099cc"),
-                    new PatternEditableBuilder.SpannableClickedListener() {
+            mainText.setText(modifiedParagraph, TextView.BufferType.EDITABLE);
+            Editable spans = (Editable) mainText.getText();
 
-                        @Override
-                        public void onSpanClicked(final String text, final View view, final int start, final int end) {
-                            Log.d("Clicked Blank", start + "--" + end);
-                            blankAnswer[0] = text;
+            for (int i = 0; i < 10; i++) {
 
-                            if (optionsGrid.getVisibility() != View.VISIBLE)
-                            {
-                                optionsGrid.setVisibility(View.VISIBLE);
-                                Animation bottomUp = AnimationUtils.loadAnimation(MainActivity.this, R.anim.bottom_up  );
-                                optionsGrid.startAnimation(bottomUp);
-                            }
+                int start = blankWordMap.get(i).getStartIndex();
+                int end = blankWordMap.get(i).getEndIndex();
+                ClickableSpan clickSpan = getClickableSpan(i, start, end, spans, blankOptions);
+                start = blankWordMap.get(i).getStartIndex();
+                end = blankWordMap.get(i).getEndIndex();
+                spans.setSpan(clickSpan, start, end,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            }
+       }
+    }
 
-                            findBlankClicked(start, end);
-                            if (blankAnswer[0] == null ){
-                                utilities.shortToast("No match!");
+    private ClickableSpan getClickableSpan(final int index, final int pstart,
+                                           final int pend, final Editable spans, final ArrayList<String> blankOptions) {
+        return new ClickableSpan() {
+            int start = pstart;
+            int end = pend;
 
-                            }
+            @Override
+            public void updateDrawState(TextPaint ds) {
+                super.updateDrawState(ds);
+            }
 
-                            optionsGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                                @Override
-                                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+            @Override
+            public void onClick(View widget) {
+
+                Log.d("Clicked Blank", start + "--" + end);
+            //    blankAnswer[0] = spans.toString();
+
+                if (optionsGrid.getVisibility() != View.VISIBLE)
+                {
+                    optionsGrid.setVisibility(View.VISIBLE);
+
+                    optionsGrid.startAnimation(bottomUp);
+                }
+
+                findBlankClicked(start, end);
+
+                if (blankAnswer[0] == null ){
+                    utilities.shortToast("No match!");
+                }
+
+                optionsGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                                 /*    if (view.getAlpha() == 1.0f) {
                                         view.setAlpha(0.50f);
                                     }else {
                                         view.setAlpha(1.0f);
                                     }  */
-                                    blankAnswer[2] = blankOptions.get(i);
-                                    Animation bottomDown = AnimationUtils.loadAnimation(MainActivity.this, R.anim.bottom_down  );
-                                    optionsGrid.startAnimation(bottomDown);
-                                    optionsGrid.setVisibility(View.GONE);
 
-                                    text.replace("_____", blankAnswer[2]);
+                        blankAnswer[2] = blankOptions.get(i);
+                        updateWordHashMap(start, end, blankAnswer[2]);
 
-                                    modifyScore(blankAnswer);
+                        optionsGrid.startAnimation(bottomDown);
+                        optionsGrid.setVisibility(View.GONE);
 
-                                /*    Editable textViews = (Editable) view;
-                                    Log.d("Values - ", start + "----" + end );
-                                    textViews.replace(start, end, blankAnswer[1]);
-                                /*    Spanned span = (Spanned) textViews.getText();
-                                    String text = String.valueOf(span.subSequence(start, end));
-                                    text.replace(text, blankAnswer[1]);
+                        int newEnd = blankWordMap.get(Integer.parseInt(blankAnswer[0])).getEndIndex();
 
-                                /*    if (blankAnswer[2]!= null && blankAnswer[2].length() > 0){
-                                        blankAnswer[0].replace(blankAnswer[0], blankAnswer[1]);
-                                    } */
-                                }
-                            });
+                        spans.replace(start, end, blankAnswer[2]);
+                        end = start + blankAnswer[2].length();
+                        spans.setSpan(this, start, end,
+                                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
+                        modifyScore(blankAnswer);
+                    }
+                });
 
-                        }
+            }
+        };
+    }
 
-                    }).into(mainText);
+    private void updateWordHashMap(int start, int end, String option) {
+
+        int len = option.length();
+        for (int lineNo = 0; lineNo < blankWordMap.size() ; lineNo++){
+            Word blankWord = blankWordMap.get(lineNo);
+
+            if (blankWord != null && (start >= blankWord.getStartIndex() && end <= blankWord.getEndIndex())){
+                    blankWord.setStartIndex(start);
+                    blankWord.setEndIndex(start + len);
+
+                    for (int i = lineNo+1; i < blankWordMap.size(); i++){
+                        blankWordMap.get(i).setStartIndex(blankWordMap.get(i).getStartIndex() + len -5);
+                        blankWordMap.get(i).setEndIndex(blankWordMap.get(i).getEndIndex()+ len - 5);
+                    }
+            }
         }
     }
+
 
     private void findBlankClicked(int start, int end) {
 
@@ -185,6 +227,7 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
     private void onAppRefresh()
     {
         blankWordMap = new HashMap<Integer, Word>();
+        score = 0;
 
         if (optionsGrid.getVisibility() == View.VISIBLE){
             optionsGrid.setVisibility(View.GONE);
