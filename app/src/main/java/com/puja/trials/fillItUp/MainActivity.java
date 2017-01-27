@@ -108,7 +108,8 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
         {
             utilities.shortToast("Could not find any text!");
         }else {
-        //    mainText.setText(modifiedParagraph);
+            mainText.setText(modifiedParagraph, TextView.BufferType.EDITABLE);
+            Editable mainPara = (Editable) mainText.getText();
 
             if (options != null){
                 Collections.shuffle(options);
@@ -118,51 +119,33 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
                 utilities.longToast("No options to show!");
             }
 
-            mainText.setText(modifiedParagraph, TextView.BufferType.EDITABLE);
-            Editable spans = (Editable) mainText.getText();
-
             for (int i = 0; i < 10; i++) {
-
-                int start = blankWordMap.get(i).getStartIndex();
-                int end = blankWordMap.get(i).getEndIndex();
-                ClickableSpan clickSpan = getClickableSpan(i, start, end, spans, blankOptions);
-                start = blankWordMap.get(i).getStartIndex();
-                end = blankWordMap.get(i).getEndIndex();
-                spans.setSpan(clickSpan, start, end,
+                ClickableSpan clickSpan = setBlanksClickable(i, blankWordMap.get(i).getStartIndex(), blankWordMap.get(i).getEndIndex(), mainPara, blankOptions);
+                int newStart = blankWordMap.get(i).getStartIndex();
+                int newEnd = blankWordMap.get(i).getEndIndex();
+                mainPara.setSpan(clickSpan, newStart, newEnd,
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
        }
     }
 
-    private ClickableSpan getClickableSpan(final int index, final int pstart,
-                                           final int pend, final Editable spans, final ArrayList<String> blankOptions) {
+    private ClickableSpan setBlanksClickable(final int index, final int bStart,
+                                           final int bEnd, final Editable spans, final ArrayList<String> blankOptions) {
         return new ClickableSpan() {
-            int start = pstart;
-            int end = pend;
-
-            @Override
-            public void updateDrawState(TextPaint ds) {
-                super.updateDrawState(ds);
-            }
+            int start = bStart;
+            int end = bEnd;
 
             @Override
             public void onClick(View widget) {
 
                 Log.d("Clicked Blank", start + "--" + end);
-            //    blankAnswer[0] = spans.toString();
 
-                if (optionsGrid.getVisibility() != View.VISIBLE)
-                {
+                if (optionsGrid.getVisibility() != View.VISIBLE) {
                     optionsGrid.setVisibility(View.VISIBLE);
-
                     optionsGrid.startAnimation(bottomUp);
                 }
 
                 findBlankClicked(start, end);
-
-                if (blankAnswer[0] == null ){
-                    utilities.shortToast("No match!");
-                }
 
                 optionsGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
@@ -189,7 +172,6 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
                         modifyScore(blankAnswer);
                     }
                 });
-
             }
         };
     }
@@ -221,6 +203,9 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
                 blankAnswer[0] = String.valueOf(lineNo);
                 blankAnswer[1] =  blankWord.getWord();
             }
+        }
+        if (blankAnswer[0] == null ){
+            utilities.shortToast("No match!");
         }
     }
 

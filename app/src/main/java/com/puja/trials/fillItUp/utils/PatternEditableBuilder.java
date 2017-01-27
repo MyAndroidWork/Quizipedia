@@ -81,8 +81,6 @@ public class PatternEditableBuilder {
             super.updateDrawState(ds);
         }
 
-
-
         @Override
         public void onClick(View widget) {
 
