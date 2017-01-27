@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
     Map<Integer, Word> blankWordMap;
     GetWikipediaContentAsync getContent;
     OptionsAdapter adapter;
-
+    final String[] blankAnswer = new String[3];
     Utilities utilities;
     ProgressDialog progressDialog;
     int score = 0;
@@ -94,18 +94,6 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
         }
     }
 
-    private String findBlankClicked(int start, int end) {
-
-        for (int lineNo = 0; lineNo < blankWordMap.size() ; lineNo++){
-            Word blankWord = blankWordMap.get(lineNo);
-            if (blankWord != null && (start >= blankWord.getStartIndex() && end <= blankWord.getEndIndex())){
-                return blankWord.getWord();
-            }
-        }
-        return null;
-    }
-
-
     @Override
     public void processFinish(final String modifiedParagraph, ArrayList<String> options) {
 
@@ -116,21 +104,14 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
             utilities.shortToast("Could not find any text!");
         }else {
             mainText.setText(modifiedParagraph);
-         //   iv_submit.setVisibility(View.VISIBLE);
 
             if (options != null){
                 Collections.shuffle(options);
-                if (adapter == null){
-                    adapter = new OptionsAdapter(this, options);
-                    optionsGrid.setAdapter(adapter);
-                }else {
-                    adapter.notifyDataSetChanged();
-                }
+                adapter = new OptionsAdapter(this, options);
+                optionsGrid.setAdapter(adapter);
             }else {
                 utilities.longToast("No options to show!");
             }
-
-            final String[] blankAnswer = new String[2];
 
             new PatternEditableBuilder().addPattern(Pattern.compile("_____"), Color.parseColor("#ff0099cc"),
                     new PatternEditableBuilder.SpannableClickedListener() {
@@ -147,12 +128,10 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
                                 optionsGrid.startAnimation(bottomUp);
                             }
 
-                            blankAnswer[0] = findBlankClicked(start, end);
+                            findBlankClicked(start, end);
                             if (blankAnswer[0] == null ){
                                 utilities.shortToast("No match!");
 
-                            }else {
-                       //         utilities.shortToast("Clicked : " + blankWord);
                             }
 
                             optionsGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -163,11 +142,12 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
                                     }else {
                                         view.setAlpha(1.0f);
                                     }  */
-                                    blankAnswer[1] = blankOptions.get(i);
+                                    blankAnswer[2] = blankOptions.get(i);
                                     Animation bottomDown = AnimationUtils.loadAnimation(MainActivity.this, R.anim.bottom_down  );
                                     optionsGrid.startAnimation(bottomDown);
-                                    //    utilities.shortToast("Clicked : " + blankAnswer[1]);
                                     optionsGrid.setVisibility(View.GONE);
+
+                                    text.replace("_____", blankAnswer[2]);
 
                                     modifyScore(blankAnswer);
 
@@ -191,17 +171,31 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
         }
     }
 
+    private void findBlankClicked(int start, int end) {
+
+        for (int lineNo = 0; lineNo < blankWordMap.size() ; lineNo++){
+            Word blankWord = blankWordMap.get(lineNo);
+            if (blankWord != null && (start >= blankWord.getStartIndex() && end <= blankWord.getEndIndex())){
+                blankAnswer[0] = String.valueOf(lineNo);
+                blankAnswer[1] =  blankWord.getWord();
+            }
+        }
+    }
+
     private void onAppRefresh()
     {
         blankWordMap = new HashMap<Integer, Word>();
+
+        if (optionsGrid.getVisibility() == View.VISIBLE){
+            optionsGrid.setVisibility(View.GONE);
+        }
 
         getContent = new GetWikipediaContentAsync(MainActivity.this, this, blankWordMap);
         getContent.execute();
     }
 
     private void modifyScore(String[] blankAnswer) {
-
-        if (blankAnswer[0].equals(blankAnswer[1])){
+        if (blankWordMap.get(Integer.parseInt(blankAnswer[0])).getWord().equals(blankAnswer[2])){
             score += 1;
         }
     }

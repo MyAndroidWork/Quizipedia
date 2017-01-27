@@ -88,8 +88,10 @@ public class GetWikipediaContentAsync extends AsyncTask<Void, Void, String> {
                     data = jsonObject.getJSONObject(key).getString("extract");
 
                 } while (data == null || data.length() < 2000);
+
                 data = data.replaceAll("\\[[^\\]]*\\]", "");
                 data = findBlankWords(data);
+
                 Log.d("doInBackground", "finished");
             } catch (IOException e) {
                 e.printStackTrace();
@@ -120,8 +122,8 @@ public class GetWikipediaContentAsync extends AsyncTask<Void, Void, String> {
         int start = iterator.first();
         int noOfLines = 0, blankNo = 0, noOfWords=0;
         int endIndexWord, startIndexWord;
-
-        for (int end = iterator.next(); end != BreakIterator.DONE && noOfLines < 10; start = end, end = iterator.next()) {
+//noOfLines < 10
+        for (int end = iterator.next(); end != BreakIterator.DONE && blankWordMap.size() != 10; start = end, end = iterator.next()) {
             String line = text.substring(start, end);
 
             if (line.length() >1 )
