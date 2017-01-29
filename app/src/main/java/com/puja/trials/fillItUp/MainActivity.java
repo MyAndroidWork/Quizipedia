@@ -1,5 +1,6 @@
 package com.puja.trials.fillItUp;
 
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -16,6 +17,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -70,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
             mainText.setMovementMethod(LinkMovementMethod.getInstance());
             optionsGrid = (GridView) findViewById(R.id.options_gridview);
             iv_submit = (ImageView) findViewById(R.id.iv_submit);
+
             iv_refresh = (ImageView) findViewById(R.id.iv_refresh);
             bottomUp = AnimationUtils.loadAnimation(MainActivity.this, R.anim.bottom_up);
             bottomDown = AnimationUtils.loadAnimation(MainActivity.this, R.anim.bottom_down);
@@ -82,6 +85,33 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
             iv_submit.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+
+                    final Dialog scoreDialog = new Dialog(MainActivity.this);
+                    scoreDialog.setCancelable(false);
+                    scoreDialog.setContentView(R.layout.custom_dialog);
+                    scoreDialog.setTitle("Score");
+                    TextView scoreText = (TextView)scoreDialog.findViewById(R.id.tv_scoreMessage);
+                    ImageView scoreEmoticon = (ImageView)scoreDialog.findViewById(R.id.iv_scoreEmoticon);
+                    Button replayButton = (Button)scoreDialog.findViewById(R.id.button_replay);
+
+
+                    if (score < 5){
+                        scoreEmoticon.setImageResource(R.drawable.ic_action_mood_bad);
+                        scoreText.setText("Your score is " + score + ".\n Better Luck next time!");
+                    }
+                    else {
+                        scoreEmoticon.setImageResource(R.drawable.ic_action_mood);
+                        scoreText.setText("Your score is " + score + ".\n Well Played!");
+                    }
+
+                    replayButton.setOnClickListener(new View.OnClickListener(){
+                        @Override
+                        public void onClick(View v) {
+                            scoreDialog.dismiss();
+                            onAppRefresh();
+                        }
+                    });
+                    scoreDialog.show();
 
                     utilities.longToast("Score-" + score);
                 }
@@ -106,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
 
         if (modifiedParagraph == null)
         {
-            utilities.shortToast("Could not find any text!");
+            utilities.shortToast("Could not find any text! Please refresh");
         }else {
             mainText.setText(modifiedParagraph, TextView.BufferType.EDITABLE);
             Editable mainPara = (Editable) mainText.getText();
@@ -120,9 +150,13 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
             }
 
             for (int i = 0; i < 10; i++) {
-                ClickableSpan clickSpan = setBlanksClickable(i, blankWordMap.get(i).getStartIndex(), blankWordMap.get(i).getEndIndex(), mainPara, blankOptions);
-                int newStart = blankWordMap.get(i).getStartIndex();
-                int newEnd = blankWordMap.get(i).getEndIndex();
+             //   int newStart = blankWordMap.get(i).getStartIndex();
+             //   int newEnd = blankWordMap.get(i).getEndIndex();
+                int z = i+1;
+                int newStart = mainPara.toString().indexOf("(" + z + ") ") + 4;
+                int newEnd = newStart + 5;
+                ClickableSpan clickSpan = setBlanksClickable(i, newStart, newEnd, mainPara, blankOptions);
+
                 mainPara.setSpan(clickSpan, newStart, newEnd,
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
@@ -130,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
     }
 
     private ClickableSpan setBlanksClickable(final int index, final int bStart,
-                                           final int bEnd, final Editable spans, final ArrayList<String> blankOptions) {
+                                           final int bEnd, final Editable mainPara, final ArrayList<String> blankOptions) {
         return new ClickableSpan() {
             int start = bStart;
             int end = bEnd;
@@ -155,18 +189,19 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
                                     }else {
                                         view.setAlpha(1.0f);
                                     }  */
-
+                        blankAnswer[1] = blankWordMap.get(i).getWord();
                         blankAnswer[2] = blankOptions.get(i);
-                        updateWordHashMap(start, end, blankAnswer[2]);
+                    //    updateWordHashMap(start, end, blankAnswer[2]);
 
                         optionsGrid.startAnimation(bottomDown);
                         optionsGrid.setVisibility(View.GONE);
 
                         int newEnd = blankWordMap.get(Integer.parseInt(blankAnswer[0])).getEndIndex();
-
-                        spans.replace(start, end, blankAnswer[2]);
-                        end = start + blankAnswer[2].length();
-                        spans.setSpan(this, start, end,
+                        int z = index+1;
+                        int s = mainPara.toString().indexOf("(" + z + ") ") + 4;
+                        mainPara.replace(s, s+5, blankAnswer[2]);
+                        end = s + blankAnswer[2].length();
+                        mainPara.setSpan(this, start, end,
                                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 
                         modifyScore(blankAnswer);
@@ -223,7 +258,7 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
     }
 
     private void modifyScore(String[] blankAnswer) {
-        if (blankWordMap.get(Integer.parseInt(blankAnswer[0])).getWord().equals(blankAnswer[2])){
+        if (blankAnswer[1].equals(blankAnswer[2])){
             score += 1;
         }
     }

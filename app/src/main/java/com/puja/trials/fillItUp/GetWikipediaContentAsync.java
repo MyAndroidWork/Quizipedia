@@ -57,6 +57,7 @@ public class GetWikipediaContentAsync extends AsyncTask<Void, Void, String> {
     protected void onPreExecute() {
         super.onPreExecute();
         mDialog.setMessage("Loading..");
+        mDialog.setCancelable(false);
         mDialog.show();
     }
 
