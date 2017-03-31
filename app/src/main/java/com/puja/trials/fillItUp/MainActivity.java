@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
             mainText.setMovementMethod(LinkMovementMethod.getInstance());
             optionsGrid = (GridView) findViewById(R.id.options_gridview);
             iv_submit = (ImageView) findViewById(R.id.iv_submit);
-
+            iv_submit.setEnabled(false);
             iv_refresh = (ImageView) findViewById(R.id.iv_refresh);
             bottomUp = AnimationUtils.loadAnimation(MainActivity.this, R.anim.bottom_up);
             bottomDown = AnimationUtils.loadAnimation(MainActivity.this, R.anim.bottom_down);
@@ -93,7 +93,6 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
                     TextView scoreText = (TextView)scoreDialog.findViewById(R.id.tv_scoreMessage);
                     ImageView scoreEmoticon = (ImageView)scoreDialog.findViewById(R.id.iv_scoreEmoticon);
                     Button replayButton = (Button)scoreDialog.findViewById(R.id.button_replay);
-
 
                     if (score < 5){
                         scoreEmoticon.setImageResource(R.drawable.ic_action_mood_bad);
@@ -122,7 +121,6 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
                 public void onClick(View view) {
                     onAppRefresh();
                 }});
-
         }
         else {
             utilities.longToast("No Internet Connection Available!");
@@ -153,12 +151,16 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
              //   int newStart = blankWordMap.get(i).getStartIndex();
              //   int newEnd = blankWordMap.get(i).getEndIndex();
                 int z = i+1;
-                int newStart = mainPara.toString().indexOf("(" + z + ") ") + 4;
-                int newEnd = newStart + 5;
-                ClickableSpan clickSpan = setBlanksClickable(i, newStart, newEnd, mainPara, blankOptions);
+                int newStart, newEnd;
+                newStart = mainPara.toString().indexOf("(" + z + ") ") + 4;
+                newEnd = newStart + 5;
+                if (z == 10){
+                 newStart = mainPara.toString().indexOf("(" + z + ") ") + 5;
+                  newEnd  = newStart + 5;
+                }
 
-                mainPara.setSpan(clickSpan, newStart, newEnd,
-                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                ClickableSpan clickSpan = setBlanksClickable(i, newStart, newEnd, mainPara, blankOptions);
+                mainPara.setSpan(clickSpan, newStart, newEnd, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
             }
        }
     }
@@ -171,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
 
             @Override
             public void onClick(View widget) {
-
+                iv_submit.setEnabled(true);
                 Log.d("Clicked Blank", start + "--" + end);
 
                 if (optionsGrid.getVisibility() != View.VISIBLE) {
@@ -191,6 +193,7 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
                                     }  */
                         blankAnswer[1] = blankWordMap.get(i).getWord();
                         blankAnswer[2] = blankOptions.get(i);
+                        blankAnswer[0] = blankAnswer[2];
                     //    updateWordHashMap(start, end, blankAnswer[2]);
 
                         optionsGrid.startAnimation(bottomDown);
@@ -199,7 +202,12 @@ public class MainActivity extends AppCompatActivity implements GetWikipediaConte
                         int newEnd = blankWordMap.get(Integer.parseInt(blankAnswer[0])).getEndIndex();
                         int z = index+1;
                         int s = mainPara.toString().indexOf("(" + z + ") ") + 4;
-                        mainPara.replace(s, s+5, blankAnswer[2]);
+                        if (mainPara.charAt(s) == '_'){
+                            mainPara.replace(s, s+5 , blankAnswer[2]);
+                        }else {
+
+                        }
+
                         end = s + blankAnswer[2].length();
                         mainPara.setSpan(this, start, end,
                                 Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
